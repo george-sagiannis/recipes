@@ -597,13 +597,18 @@ const timeout = function(s) {
 };
 // https://forkify-api.herokuapp.com/v2
 ///////////////////////////////////////
+//we have the function controlRecipes in the controller that will then be called by controlRecipes between loading the recipe and then rendering it using the view (controller works as a bridge here between model and view)
 const controlRecipes = async function() {
     try {
+        //the controller actually gets the id right here and so then when it calls the model so the loadRecipe function it can pass that ID into it export const loadRecipe = async function (id)
         const id = window.location.hash.slice(1);
         if (!id) return;
         // spinner added in refresh
         (0, _recipeViewJsDefault.default).renderSpinner();
         // 1) Load Recipe
+        //it is an async function and therefore it is going to return a promise that we then need to handle whenever we call that async function
+        //this loadRecipe fucntion here does not return anything. And so there2fore, we are not storing any result into a new variable
+        //Instead here we will get access to state.recipe
         await _modelJs.loadRecipe(id);
         // 2) Rendering recipe (generally is the container of the recipe)
         (0, _recipeViewJsDefault.default).render(_modelJs.state.recipe);
@@ -1853,15 +1858,14 @@ parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "state", ()=>state);
 parcelHelpers.export(exports, "loadRecipe", ()=>loadRecipe);
 var _regeneratorRuntime = require("regenerator-runtime");
+var _configJs = require("./config.js");
+var _helpersJs = require("./helpers.js");
 const state = {
     recipe: {}
 };
 const loadRecipe = async function(id) {
     try {
-        // 1) loading recipe
-        const res = await fetch(`https://forkify-api.herokuapp.com/api/v2/recipes/${id}`);
-        const data = await res.json();
-        if (!res.ok) throw new Error(`${data.message} (${res.status})`);
+        const data = await (0, _helpersJs.getJSON)(`${(0, _configJs.API_URL)}/${id}`);
         //  console.log(res, data);
         const { recipe } = data.data;
         state.recipe = {
@@ -1876,11 +1880,14 @@ const loadRecipe = async function(id) {
         };
         console.log(state.recipe);
     } catch (err) {
-        alert(err);
+        console.error(`${err} hello here is the error`);
+    // Error: Invalid _id: 5ed6604591c37cdc054bc886sssssss. (400) hello here is the error
+    //th error is not appearing in the helpers.js but here because in helpers i have this throw err;
+    //http://localhost:1234/#5ed6604591c37cdc054bc886sssssss --> for wrong url i take the above error
     }
 };
 
-},{"regenerator-runtime":"dXNgZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"dXNgZ":[function(require,module,exports) {
+},{"regenerator-runtime":"dXNgZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./config.js":"k5Hzs","./helpers.js":"hGI1E"}],"dXNgZ":[function(require,module,exports) {
 /**
  * Copyright (c) 2014-present, Facebook, Inc.
  *
@@ -2495,7 +2502,50 @@ exports.export = function(dest, destName, get) {
     });
 };
 
-},{}],"l60JC":[function(require,module,exports) {
+},{}],"k5Hzs":[function(require,module,exports) {
+//i put the important variables that should be constants and should be reused acrross the project
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "API_URL", ()=>API_URL);
+parcelHelpers.export(exports, "TIMEOUT_SEC", ()=>TIMEOUT_SEC);
+const API_URL = "https://forkify-api.herokuapp.com/api/v2/recipes";
+const TIMEOUT_SEC = 10;
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"hGI1E":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "getJSON", ()=>getJSON);
+var _regeneratorRuntime = require("regenerator-runtime");
+var _configJs = require("./config.js");
+//the goal here is to contain a couple of functions that we reuse over and over in the project
+const timeout = function(s) {
+    return new Promise(function(_, reject) {
+        setTimeout(function() {
+            reject(new Error(`Request took too long! Timeout after ${s} second`));
+        }, s * 1000);
+    });
+};
+const getJSON = async function(url) {
+    try {
+        // 1) loading recipe
+        //HERE WE JUST NEED TO GET THIS id FROM ANYWHERE THATS WHY WE PPASS THE ID IN THE export const loadRecipe = async function (id) 
+        const fetchPro = fetch(url);
+        //ten seconds that i i have in config.js
+        const res = await Promise.race([
+            fetchPro,
+            timeout((0, _configJs.TIMEOUT_SEC))
+        ]);
+        const data = await res.json();
+        if (!res.ok) throw new Error(`${data.message} (${res.status})`);
+        //this data will become the resolved value of this promise
+        return data;
+    } catch (err) {
+        //instead of console.log(err) with that way i handle the error in the model with the re-throw the error below with
+        throw err;
+    }
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","regenerator-runtime":"dXNgZ","./config.js":"k5Hzs"}],"l60JC":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _iconsSvg = require("url:../../img/icons.svg"); //Parcel 2
@@ -2509,23 +2559,26 @@ class RecipeView {
         this.#data = data;
         const markup = this.#generateMarkup();
         this.#clear();
-        // 3) insert here HTML into DOM with json HTML method on the parent element (for my case the class recipe)
+        // 3) insert here HTML into DOM with json HTML method on the parent element (for my case the class recipe) amd it is done inside render
         this.#parentElement.insertAdjacentHTML("afterbegin", markup);
     }
+    //this method here will be usable for all the views as long as all the views have a parentElemnet property like this one #parentElement = document.querySelector('.recipe');
     #clear() {
         this.#parentElement.innerHTML = "";
     }
+    //this is a method
     renderSpinner = function() {
         const markup = `
-    <div class="spinner">
-        <svg>
-        <use href="${(0, _iconsSvgDefault.default)}#icon-loader"></use>
-        </svg>
-    </div> 
-    `;
+        <div class="spinner">
+            <svg>
+            <use href="${(0, _iconsSvgDefault.default)}#icon-loader"></use>
+            </svg>
+        </div> 
+        `;
         this.#parentElement.innerHTML = "";
         this.#parentElement.insertAdjacentHTML("afterbegin", markup);
     };
+    //private method because we are using Babel here we use this syntax
     #generateMarkup() {
         return ` <figure class="recipe__fig">
           <img src="${this.#data.image}" alt="${this.#data.title}" class="recipe__img" />
@@ -2582,20 +2635,7 @@ class RecipeView {
           <!-- transform the array of strings into a single big string using the join method -->
           
           <ul class="recipe__ingredient-list">
-            ${this.#data.ingredients.map((ing)=>{
-            return `
-                <li class="recipe__ingredient">
-                  <svg class="recipe__icon">
-                    <use href="${0, _iconsSvgDefault.default}#icon-check"></use>
-                  </svg>
-                  <div class="recipe__quantity">${ing.quantity ? new (0, _fractional.Fraction)(ing.quantity).toString() : ""} </div>
-                  <div class="recipe__description">
-                    <span class="recipe__unit">${ing.unit}</span>
-                    ${ing.description}
-                  </div>
-                </li>
-              `;
-        }).join("")}
+            ${this.#data.ingredients.map(this.#generateMarkupIngredient).join("")}
           </ul>
         </div>
 
@@ -2618,6 +2658,20 @@ class RecipeView {
             </svg>
           </a>
         </div>
+        `;
+    }
+    #generateMarkupIngredient(ing) {
+        return `
+        <li class="recipe__ingredient">
+            <svg class="recipe__icon">
+            <use href="${0, _iconsSvgDefault.default}#icon-check"></use>
+            </svg>
+            <div class="recipe__quantity">${ing.quantity ? new (0, _fractional.Fraction)(ing.quantity).toString() : ""} </div>
+            <div class="recipe__description">
+            <span class="recipe__unit">${ing.unit}</span>
+            ${ing.description}
+            </div>
+        </li>
         `;
     }
 }

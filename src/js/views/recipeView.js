@@ -3,41 +3,39 @@ import {Fraction} from 'fractional';
 console.log(Fraction);
 
 class RecipeView {
-    #parentElement = document.querySelector('.recipe');
-    #data;
+    #parentElement = document.querySelector('.recipe'); //parentElement
+    #data; //data property
 
     render(data) {
         this.#data = data;
-
         const markup = this.#generateMarkup();
-
         this.#clear();
-
-      // 3) insert here HTML into DOM with json HTML method on the parent element (for my case the class recipe)
-      this.#parentElement.insertAdjacentHTML('afterbegin', markup);
-
-
+        // 3) insert here HTML into DOM with json HTML method on the parent element (for my case the class recipe) amd it is done inside render
+        this.#parentElement.insertAdjacentHTML('afterbegin', markup);
     }
 
+
+    //this method here will be usable for all the views as long as all the views have a parentElemnet property like this one #parentElement = document.querySelector('.recipe');
 
     #clear() {
         this.#parentElement.innerHTML = '';
     }
 
 
+    //this is a method
     renderSpinner = function() {
-    const markup = `
-    <div class="spinner">
-        <svg>
-        <use href="${icons}#icon-loader"></use>
-        </svg>
-    </div> 
-    `;
-    this.#parentElement.innerHTML ='';
-    this.#parentElement.insertAdjacentHTML('afterbegin', markup);
+        const markup = `
+        <div class="spinner">
+            <svg>
+            <use href="${icons}#icon-loader"></use>
+            </svg>
+        </div> 
+        `;
+        this.#parentElement.innerHTML ='';
+        this.#parentElement.insertAdjacentHTML('afterbegin', markup);
     };
 
-
+    //private method because we are using Babel here we use this syntax
     #generateMarkup() {
        return ` <figure class="recipe__fig">
           <img src="${this.#data.image}" alt="${this.#data.title}" class="recipe__img" />
@@ -94,20 +92,7 @@ class RecipeView {
           <!-- transform the array of strings into a single big string using the join method -->
           
           <ul class="recipe__ingredient-list">
-            ${this.#data.ingredients.map(ing => {
-              return `
-                <li class="recipe__ingredient">
-                  <svg class="recipe__icon">
-                    <use href="${icons}#icon-check"></use>
-                  </svg>
-                  <div class="recipe__quantity">${ing.quantity ? new Fraction(ing.quantity).toString() : ''} </div>
-                  <div class="recipe__description">
-                    <span class="recipe__unit">${ing.unit}</span>
-                    ${ing.description}
-                  </div>
-                </li>
-              `;
-            }).join('')}
+            ${this.#data.ingredients.map(this.#generateMarkupIngredient).join('')}
           </ul>
         </div>
 
@@ -132,9 +117,22 @@ class RecipeView {
         </div>
         `;
 
+    }
 
 
-
+    #generateMarkupIngredient(ing) {
+        return `
+        <li class="recipe__ingredient">
+            <svg class="recipe__icon">
+            <use href="${icons}#icon-check"></use>
+            </svg>
+            <div class="recipe__quantity">${ing.quantity ? new Fraction(ing.quantity).toString() : ''} </div>
+            <div class="recipe__description">
+            <span class="recipe__unit">${ing.unit}</span>
+            ${ing.description}
+            </div>
+        </li>
+        `;
     }
 
 
