@@ -28,7 +28,7 @@ const controlRecipes = async function (){
     // 1) Load Recipe
 
     //it is an async function and therefore it is going to return a promise that we then need to handle whenever we call that async function
-    //this loadRecipe fucntion here does not return anything. And so there2fore, we are not storing any result into a new variable
+    //this loadRecipe fucntion here does not return anything. And so therefore, we are not storing any result into a new variable
     //Instead here we will get access to state.recipe
     await model.loadRecipe(id);
 
@@ -37,7 +37,8 @@ const controlRecipes = async function (){
     recipeView.render(model.state.recipe);
 
   } catch (err) {
-    alert(err);
+    recipeView.renderError();
+    //here the error is shown now in the view
   }
 }
 

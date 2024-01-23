@@ -40,6 +40,7 @@ export const loadRecipe = async function (id) {
         // Error: Invalid _id: 5ed6604591c37cdc054bc886sssssss. (400) hello here is the error
         //th error is not appearing in the helpers.js but here because in helpers i have this throw err;
         //http://localhost:1234/#5ed6604591c37cdc054bc886sssssss --> for wrong url i take the above error
+        throw err;
     }
 
 }
