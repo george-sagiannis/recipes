@@ -6,13 +6,7 @@ import 'regenerator-runtime/runtime';
 
 const recipeContainer = document.querySelector('.recipe');
 
-const timeout = function (s) {
-  return new Promise(function (_, reject) {
-    setTimeout(function () {
-      reject(new Error(`Request took too long! Timeout after ${s} second`));
-    }, s * 1000);
-  });
-};
+
 
 // https://forkify-api.herokuapp.com/v2
 
@@ -49,11 +43,10 @@ const controlRecipes = async function (){
 
 // showRecipe();
 
-window.addEventListener('hashchange', controlRecipes);
-window.addEventListener('load', controlRecipes);
 
+//with this we just implemented the Publisher-Subscriber pattern
+const init = function () {
+  recipeView.addHandlerRender(controlRecipes);
+}
 
-// //if we copy the hash we need the below so not to see empty recipe
-//me syntomia grafoume ta parapano alla den paizei sosta se emena
-
-// ['hashchange', 'load'].forEach(ev => window.addEventListener(ev, showRecipe));
+init();

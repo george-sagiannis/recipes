@@ -580,21 +580,12 @@ function hmrAccept(bundle /*: ParcelRequire */ , id /*: string */ ) {
 
 },{}],"aenu9":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-var _webImmediateJs = require("core-js/modules/web.immediate.js"); // //if we copy the hash we need the below so not to see empty recipe
- //me syntomia grafoume ta parapano alla den paizei sosta se emena
- // ['hashchange', 'load'].forEach(ev => window.addEventListener(ev, showRecipe));
+var _webImmediateJs = require("core-js/modules/web.immediate.js");
 var _modelJs = require("./model.js");
 var _recipeViewJs = require("./views/recipeView.js");
 var _recipeViewJsDefault = parcelHelpers.interopDefault(_recipeViewJs);
 var _runtime = require("regenerator-runtime/runtime");
 const recipeContainer = document.querySelector(".recipe");
-const timeout = function(s) {
-    return new Promise(function(_, reject) {
-        setTimeout(function() {
-            reject(new Error(`Request took too long! Timeout after ${s} second`));
-        }, s * 1000);
-    });
-};
 // https://forkify-api.herokuapp.com/v2
 ///////////////////////////////////////
 //we have the function controlRecipes in the controller that will then be called by controlRecipes between loading the recipe and then rendering it using the view (controller works as a bridge here between model and view)
@@ -617,8 +608,11 @@ const controlRecipes = async function() {
     }
 };
 // showRecipe();
-window.addEventListener("hashchange", controlRecipes);
-window.addEventListener("load", controlRecipes);
+//with this we just implemented the Publisher-Subscriber pattern
+const init = function() {
+    (0, _recipeViewJsDefault.default).addHandlerRender(controlRecipes);
+};
+init();
 
 },{"core-js/modules/web.immediate.js":"49tUX","./model.js":"Y4A21","./views/recipeView.js":"l60JC","regenerator-runtime/runtime":"dXNgZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"49tUX":[function(require,module,exports) {
 "use strict";
@@ -2673,6 +2667,17 @@ class RecipeView {
             </div>
         </li>
         `;
+    }
+    //method (not private)
+    // window.addEventListener('hashchange', handler);
+    // window.addEventListener('load', handler);
+    // //if we copy the hash we need the below so not to see empty recipe
+    //me syntomia grafoume ta parapano alla den paizei sosta se emena
+    addHandlerRender(handler) {
+        [
+            "hashchange",
+            "load"
+        ].forEach((ev)=>window.addEventListener(ev, handler));
     }
 }
 exports.default = new RecipeView();

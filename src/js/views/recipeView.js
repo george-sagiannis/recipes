@@ -135,6 +135,22 @@ class RecipeView {
         `;
     }
 
+    //method (not private)
+
+        // window.addEventListener('hashchange', handler);
+        // window.addEventListener('load', handler);
+
+
+        // //if we copy the hash we need the below so not to see empty recipe
+        //me syntomia grafoume ta parapano alla den paizei sosta se emena
+        addHandlerRender(handler){
+            ['hashchange', 'load'].forEach(ev => window.addEventListener(ev, handler));
+        }
+    
+
+
+
+
 
 }
 
